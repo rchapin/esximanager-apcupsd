@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -u
+
+# #############################################################################
+# See the esximanager-apcupsd README.md file for details:
+# https://github.com/rchapin/esximanager-apcupsd
+#
+# #############################################################################
+# CONFIGURATIONS:
+#
+#
+CONF_FILE=/etc/esximanager-apcupsd/esximanager-apcupsd.conf
+
+# Pull in our configurations
+source $CONF_FILE
+
+LOG_FILE_PATH=$LOG_DIR/$LOG_FILE
+dryrun=${DRYRUN:-0}
+
+# #############################################################################
+
+function log() {
+  msg=$1
+  echo $msg >> $LOG_DIR/esximanager-apcupsd.log
+}
+
+# #############################################################################
+
+cmd="$VIRT_ENV_PATH/esximanager shutdown --esxihost $ESXIHOST"
+
+if [ $dryrun -eq 1 ]
+then
+  # Append the dryrun flag to the command
+  cmd="$cmd --dryrun"
+fi
+
+log "Powering off esxi host $ESXIHOST"
+log "with cmd=$cmd"
+
+$cmd >> $LOG_FILE_PATH 2>&1
+
+esximanager_retval=$?
+log "esximanager_retval=$esximanager_retval"
+log "Exiting...."

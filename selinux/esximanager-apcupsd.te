@@ -1,0 +1,39 @@
+
+module esximanager-apcupsd 1.0;
+
+require {
+        type device_t;
+	type ldconfig_exec_t;
+	type ssh_port_t;
+	type apcupsd_t;
+	type ping_exec_t;
+	type ssh_home_t;
+	type random_device_t;
+	class tcp_socket name_connect;
+	class dir search;
+	class chr_file { read write };
+	class file { execute execute_no_trans getattr ioctl open read };
+	class process setcap;
+	class rawip_socket { getopt setopt create write read };
+	class capability net_raw;
+}
+
+#============= apcupsd_t ==============
+allow apcupsd_t ldconfig_exec_t:file execute_no_trans;
+
+allow apcupsd_t device_t:chr_file { read write };
+allow apcupsd_t ldconfig_exec_t:file { execute open read };
+allow apcupsd_t ping_exec_t:file { getattr execute open read execute_no_trans };
+
+allow apcupsd_t self:process setcap;
+allow apcupsd_t self:capability net_raw;
+allow apcupsd_t self:rawip_socket { getopt setopt create write read };
+
+allow apcupsd_t random_device_t:chr_file { read write };
+
+allow apcupsd_t ssh_home_t:dir search;
+allow apcupsd_t ssh_home_t:file ioctl;
+
+allow apcupsd_t ssh_home_t:file { getattr open read };
+
+allow apcupsd_t ssh_port_t:tcp_socket name_connect;
