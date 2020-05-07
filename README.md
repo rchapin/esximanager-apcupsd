@@ -41,30 +41,42 @@ mkdir -p /var/log/esximanager-apcupsd
 
 You will need to make the following config updates and install selinux rules.
 
-1. Set the following booleans
+1. Ensure you have the following packages installed (names may vary on systems other than RHEL/CentOS)
+
+```
+yum install -y checkpolicy policycoreutils policycoreutils-python
+```
+
+2. Set the following booleans
 
 ```
 setsebool -P authlogin_nsswitch_use_ldap on
 setsebool -P nis_enabled on
 ```
 
-2. Compile the Type Enforcement (te) file in the selinux dir to enable the esximanager program the required accesses.
+3. Compile the Type Enforcement (te) file in the selinux dir to enable the esximanager program the required accesses.
 ```
 cp selinux/esximanager-apcupsd.te /var/tmp/esximanager-apcupsd.te
 ```
 
-3. Check and compile the mod file (assuming the .te file in in /var/tmp)
+4. Check and compile the mod file (assuming the .te file in in /var/tmp)
 ```
 checkmodule -M -m -o /var/tmp/esximanager-apcupsd.mod /var/tmp/esximanager-apcupsd.te
 ```
 
-4. Create the SELinux Policy Module Packet (pp) File From the .mod file
+5. Create the SELinux Policy Module Packet (pp) File From the .mod file
 ```
 semodule_package -o /var/tmp/esximanager-apcupsd.pp -m /var/tmp/esximanager-apcupsd.mod
 ```
 
-5. Install the SELinux Policy Module
+6. Install the SELinux Policy Module
 ```
 semodule -i /var/tmp/esximanager-apcupsd.pp
 ```
 
+7. Set the selinux policies on any of the ```/etc/apcupsd``` scripts that you installed as follows
+
+```
+chcon -u system_u -t bin_t /etc/apcupsd/<file>
+chmod 755 /etc/apcupsd/<file>
+```
